@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>IKA Ecuador - Staff</title>
+    <style>
+        :root {
+            --fondo: #EDEAE4;
+            --blanco: #FFFFFE;
+            --borgona: #41141B;
+            --dorado: #9B743D;
+            --texto: #2C2420;
+            --gris-suave: #A8A29E;
+            --success: #22c55e;
+            --mi-rama: rgba(155, 116, 61, 0.1);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--fondo);
+            color: var(--texto);
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* --- LOGIN --- */
+        #login-screen { text-align: center; margin-top: 20%; }
+        .logo { font-family: "Georgia", serif; font-size: 2.2rem; color: var(--borgona); border-bottom: 2px solid var(--dorado); display: inline-block; margin-bottom: 10px; }
+        input[type="tel"] { width: 80%; padding: 15px; border-radius: 8px; border: 1px solid var(--gris-suave); font-size: 1.2rem; text-align: center; margin: 30px 0 20px; outline: none; }
+        .btn-primario { background: var(--borgona); color: white; border: none; padding: 15px 40px; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        /* --- DASHBOARD --- */
+        #dashboard { display: none; }
+        .header-perfil { margin-bottom: 25px; padding-bottom: 10px; border-bottom: 1px solid var(--dorado); }
+
+        #vista-lista-eventos { display: block; }
+        #vista-detalle-evento { display: none; }
+
+        .btn-evento-link {
+            background: var(--blanco);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border-left: 6px solid var(--dorado);
+            cursor: pointer;
+        }
+
+        .btn-volver { background: none; border: none; color: var(--dorado); font-weight: bold; margin-bottom: 15px; cursor: pointer; padding: 0; }
+        .seccion-titulo { font-size: 0.8rem; color: var(--gris-suave); text-transform: uppercase; letter-spacing: 1px; margin: 20px 0 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px;}
+        .card-blanca { background: var(--blanco); padding: 15px; border-radius: 10px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* --- CHECKLIST --- */
+        .item-tarea { display: flex; align-items: center; font-size: 0.9rem; margin-bottom: 12px; }
+        .item-tarea input[type="checkbox"] { width: 22px; height: 22px; margin-right: 12px; accent-color: var(--borgona); cursor: pointer; }
+        .completado { color: var(--gris-suave); text-decoration: line-through; }
+
+        .btn-registrar {
+            width: 100%; background: var(--success); color: white; border: none;
+            padding: 15px; border-radius: 8px; font-weight: bold; margin-top: 15px;
+            display: none; cursor: pointer; box-shadow: 0 4px 10px rgba(34, 197, 94, 0.3);
+            transition: all 0.3s;
+        }
+
+        /* --- ORGANIGRAMA --- */
+        .contenedor-rama { margin-left: 15px; border-left: 1px dashed var(--dorado); display: none; }
+        .nodo-staff { padding: 12px; margin-bottom: 8px; background: var(--blanco); border-radius: 8px; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.03); border: 1px solid transparent; }
+        .es-mi-linea { border: 1px solid var(--dorado); background-color: var(--mi-rama); }
+        .es-usuario-activo { border: 2px solid var(--borgona); transform: scale(1.02); z-index: 10; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .nivel-3 { border-left: 6px solid var(--borgona); }
+        .nivel-2 { border-left: 6px solid var(--dorado); }
+        .nivel-1 { border-left: 6px solid var(--gris-suave); }
+        .info-superior { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .nombre-miembro { font-weight: bold; font-size: 0.9rem; color: var(--borgona); }
+        .rol-miembro { font-size: 0.65rem; text-transform: uppercase; color: var(--dorado); }
+        .indicador-hijos { font-size: 0.8rem; color: var(--dorado); margin-left: 8px; transition: transform 0.3s; }
+        .progress-container { width: 100%; height: 5px; background: #eee; border-radius: 10px; margin-top: 8px; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--success); transition: width 0.3s; }
+        .tareas-desplegables { display: none; margin-top: 10px; padding-top: 8px; border-top: 1px dashed #eee; }
+        .error-msg { color: #b91c1c; font-size: 0.9rem; display: none; }
+
+        /* ══════════════════════════════════════════════
+           BOTÓN CHAT FLOTANTE  con badge de no leídos
+        ══════════════════════════════════════════════ */
+        #btn-chat-flotante {
+            position: fixed; bottom: 25px; right: 25px;
+            background: var(--borgona);
+            color: white; width: 62px; height: 62px; border-radius: 50%;
+            display: none; justify-content: center; align-items: center;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+            z-index: 99; font-size: 1.6rem;
+            border: 2px solid var(--dorado);
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        #btn-chat-flotante:active { transform: scale(0.93); }
+
+        /* Badge rojo sobre el botón */
+        #badge-total {
+            position: absolute; top: -4px; right: -4px;
+            background: #dc2626; color: white;
+            font-size: 0.65rem; font-weight: 800;
+            min-width: 20px; height: 20px;
+            border-radius: 10px; padding: 0 5px;
+            display: none; align-items: center; justify-content: center;
+            border: 2px solid var(--fondo);
+            pointer-events: none;
+        }
+
+        /* ══════════════════════════════════════════════
+           OVERLAY LISTA DE CHATS
+        ══════════════════════════════════════════════ */
+        .overlay-chat {
+            position: fixed; top: 0; left: 100%; width: 100%; height: 100%;
+            background: var(--fondo); z-index: 1000;
+            transition: left 0.28s cubic-bezier(.4,0,.2,1);
+            display: flex; flex-direction: column;
+        }
+        .overlay-chat.activo { left: 0; }
+
+        .chat-header {
+            background: var(--borgona); color: white;
+            padding: 15px; display: flex; align-items: center; gap: 15px;
+            flex-shrink: 0;
+        }
+        .chat-list { flex: 1; overflow-y: auto; padding: 12px; }
+
+        /* Tarjeta de conversación con badge por contacto */
+        .chat-contacto {
+            background: var(--blanco); padding: 14px 16px; border-radius: 12px; margin-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
+            border-left: 4px solid var(--dorado);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            transition: transform 0.15s;
+        }
+        .chat-contacto:active { transform: scale(0.98); }
+
+        .badge-conv {
+            background: #dc2626; color: white;
+            font-size: 0.65rem; font-weight: 800;
+            min-width: 22px; height: 22px; border-radius: 11px;
+            padding: 0 6px;
+            display: inline-flex; align-items: center; justify-content: center;
+            margin-left: 8px; flex-shrink: 0;
+        }
+
+        /* ══════════════════════════════════════════════
+           VENTANA DE MENSAJES  (glassmorphism)
+        ══════════════════════════════════════════════ */
+        #ventana-mensajes {
+            position: fixed; top: 0; left: 100%; width: 100%; height: 100%;
+            background: var(--blanco); z-index: 1001;
+            transition: left 0.28s cubic-bezier(.4,0,.2,1);
+            display: flex; flex-direction: column;
+        }
+        #ventana-mensajes.activo { left: 0; }
+
+        .msg-header {
+            background: var(--dorado); color: white;
+            padding: 14px 16px;
+            display: flex; align-items: center; gap: 12px;
+            flex-shrink: 0;
+        }
+        .msg-header-info { flex: 1; min-width: 0; }
+        .msg-header-nombre { font-weight: 700; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .msg-header-sub { font-size: 0.7rem; opacity: 0.8; }
+
+        /* Feed con fondo elegante */
+        .feed-mensajes {
+            flex: 1; overflow-y: auto; padding: 16px 12px;
+            display: flex; flex-direction: column; gap: 8px;
+            background:
+                radial-gradient(ellipse at 20% 80%, rgba(155,116,61,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(65,20,27,0.06) 0%, transparent 60%),
+                #f0ece4;
+        }
+
+        /* ── BURBUJAS GLASSMORPHISM ── */
+        .burbuja {
+            max-width: 82%;
+            padding: 11px 16px;
+            border-radius: 20px;
+            font-size: 0.88rem;
+            line-height: 1.45;
+            position: relative;
+            /* glassmorphism base */
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.35);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.3);
+            word-break: break-word;
+        }
+
+        /* Mis mensajes: dorado translúcido */
+        .burbuja.yo {
+            align-self: flex-end;
+            background: rgba(155, 116, 61, 0.82);
+            color: white;
+            border-bottom-right-radius: 5px;
+            border: 1px solid rgba(155,116,61,0.5);
+        }
+
+        /* Mensajes recibidos: color único por usuario */
+        .burbuja.otro {
+            align-self: flex-start;
+            color: white;
+            border-bottom-left-radius: 5px;
+        }
+
+        .burbuja-nombre-grupo {
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .burbuja-hora {
+            font-size: 0.6rem;
+            opacity: 0.65;
+            text-align: right;
+            margin-top: 5px;
+            display: flex; justify-content: flex-end; align-items: center; gap: 3px;
+        }
+
+        /* ── SEPARADOR DE FECHA ── */
+        .separador-fecha {
+            text-align: center;
+            font-size: 0.65rem;
+            color: var(--gris-suave);
+            background: rgba(255,255,255,0.5);
+            border-radius: 10px;
+            padding: 3px 10px;
+            align-self: center;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255,255,255,0.4);
+            margin: 4px 0;
+        }
+
+        /* ── Aviso de rol bloqueado ── */
+        #aviso-bloqueado {
+            background: rgba(65,20,27,0.08);
+            border: 1px dashed var(--borgona);
+            color: var(--borgona);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.8rem;
+            text-align: center;
+            display: none;
+            margin: 8px 12px;
+        }
+
+        /* ── Input de chat ── */
+        .input-chat-container {
+            padding: 12px 14px;
+            display: flex; gap: 10px;
+            border-top: 1px solid rgba(0,0,0,0.08);
+            background: white;
+            flex-shrink: 0;
+        }
+        .input-chat-container input {
+            flex: 1; padding: 12px 16px; border-radius: 25px;
+            border: 1px solid #ddd; outline: none; font-size: 0.9rem;
+            background: var(--fondo);
+        }
+        .input-chat-container input:focus { border-color: var(--dorado); }
+        .btn-enviar {
+            background: var(--borgona); color: white; border: none;
+            padding: 10px 18px; border-radius: 25px; font-weight: bold;
+            cursor: pointer; font-size: 1rem; transition: background 0.2s;
+            flex-shrink: 0;
+        }
+        .btn-enviar:active { background: var(--dorado); }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <!-- LOGIN -->
+    <div id="login-screen">
+        <div class="logo">IKA ECUADOR</div>
+        <p>Logística de Eventos</p>
+        <input type="tel" id="input-cedula" placeholder="Cédula de Identidad" maxlength="10">
+        <br>
+        <button class="btn-primario" onclick="autenticar()">INGRESAR</button>
+        <p id="error-text" class="error-msg">Cédula no registrada.</p>
+    </div>
+
+    <!-- DASHBOARD -->
+    <div id="dashboard">
+        <div class="header-perfil">
+            <p style="margin:0; font-size:0.8rem; color:var(--gris-suave);">Bienvenido(a),</p>
+            <h2 id="worker-name" style="margin:0; color:var(--borgona);">Nombre</h2>
+        </div>
+
+        <div id="vista-lista-eventos">
+            <p style="font-size:0.9rem; margin-bottom:15px;">Mis Eventos:</p>
+            <div id="contenedor-botones-eventos"></div>
+        </div>
+
+        <div id="vista-detalle-evento">
+            <button class="btn-volver" onclick="volverALista()">← Volver</button>
+            <h3 id="det-evento-titulo" style="color:var(--borgona); margin:0;"></h3>
+            <p id="det-evento-fecha" style="font-size:0.8rem; color:var(--gris-suave);"></p>
+
+            <div class="seccion-titulo">Mis Responsabilidades</div>
+            <div id="contenedor-mis-tareas" class="card-blanca"></div>
+
+            <button id="btn-registrar-cambios" class="btn-registrar" onclick="registrarCambiosServidor()">REGISTRAR CAMBIOS</button>
+
+            <div class="seccion-titulo">Equipo (Mi Línea de Trabajo)</div>
+            <div id="contenedor-organigrama"></div>
+        </div>
+
+        <button onclick="cerrarSesion()" style="background:none; border:none; color:var(--gris-suave); width:100%; margin-top:30px; text-decoration:underline; font-size:0.8rem; cursor:pointer;">Cerrar Sesión</button>
+    </div>
+</div>
+
+<!-- BOTÓN CHAT FLOTANTE -->
+<div id="btn-chat-flotante" onclick="abrirMenuChats()">
+    💬
+    <div id="badge-total"></div>
+</div>
+
+<!-- OVERLAY LISTA DE CHATS -->
+<div id="overlay-lista-chats" class="overlay-chat">
+    <div class="chat-header">
+        <button onclick="cerrarMenuChats()" style="background:none; border:none; color:white; font-size:1.5rem; cursor:pointer;">✕</button>
+        <h3 style="margin:0;">Mensajería</h3>
+    </div>
+    <div id="lista-contactos" class="chat-list"></div>
+</div>
+
+<!-- VENTANA DE MENSAJES -->
+<div id="ventana-mensajes">
+    <div class="msg-header">
+        <button onclick="cerrarVentanaMensajes()" style="background:none; border:none; color:white; font-size:1.4rem; cursor:pointer; flex-shrink:0;">←</button>
+        <div class="msg-header-info">
+            <div class="msg-header-nombre" id="nombre-chat-activo">Chat</div>
+            <div class="msg-header-sub" id="rol-chat-activo"></div>
+        </div>
+    </div>
+    <div id="feed-mensajes" class="feed-mensajes"></div>
+    <div id="aviso-bloqueado">🔒 No podés enviar mensajes a esta persona según tu rol.</div>
+    <div class="input-chat-container">
+        <input type="text" id="input-nuevo-mensaje" placeholder="Escribe aquí..." onkeydown="if(event.key==='Enter') enviarMensaje()">
+        <button class="btn-enviar" onclick="enviarMensaje()">➤</button>
+    </div>
+</div>
+
+<script>
+    /* ══════════════════════════════════════════════════════════════
+       ESTADO GLOBAL
+    ══════════════════════════════════════════════════════════════ */
+    let dbGlobal         = {};
+    let usuarioActual    = null;
+    let cambiosPendientes = {};
+    let idEventoActivo   = null;
+    let socioChatDestino = null;   // socio_id numérico o 'GENERAL'
+    let rolChatDestino   = '';
+    let intervaloCarga   = null;   // polling de mensajes
+    let intervaloBadges  = null;   // polling de no-leídos
+    let puedeEscribir    = true;   // si el usuario puede enviar en la conv. activa
+
+    const JERARQUIA = { "DIRECTOR": 3, "COORDINADOR": 2, "COLABORADOR": 1 };
+    const SERVER_URL = "http://localhost:5001";
+
+    /* ── Paleta de colores consistente por usuario ──
+       Se asigna a partir del socio_id → siempre el mismo color */
+    const PALETA_USUARIOS = [
+        'rgba(65,20,27,0.82)',      // borgona
+        'rgba(30,80,120,0.82)',     // azul marino
+        'rgba(34,100,60,0.82)',     // verde oscuro
+        'rgba(90,40,100,0.82)',     // púrpura
+        'rgba(140,60,20,0.82)',     // naranja teja
+        'rgba(20,90,110,0.82)',     // teal oscuro
+        'rgba(100,30,70,0.82)',     // rosa oscuro
+        
+    ];
+
+    function colorParaUsuario(socioId) {
+        let h = 0;
+        String(socioId).split('').forEach(c => h = (h * 35 + c.charCodeAt(0)) & 0xffff);
+        return PALETA_USUARIOS[h % PALETA_USUARIOS.length];
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       AUTENTICACIÓN
+    ══════════════════════════════════════════════════════════════ */
+    window.onload = function() {
+        const ced = localStorage.getItem('cedula_ika');
+        if (ced) {
+            document.getElementById('input-cedula').value = ced;
+            autenticar();
+        }
+    };
+
+    async function autenticar() {
+        const cedula = document.getElementById('input-cedula').value;
+        try {
+            const res = await fetch('data_servidor.json?t=' + Date.now());
+            dbGlobal = await res.json();
+
+            if (dbGlobal[cedula]) {
+                localStorage.setItem('cedula_ika', cedula);
+                usuarioActual = dbGlobal[cedula];
+                mostrarDashboard();
+                if (idEventoActivo) verDetalleEvento(idEventoActivo);
+            } else {
+                document.getElementById('error-text').style.display = 'block';
+                localStorage.removeItem('cedula_ika');
+            }
+        } catch (e) { console.error("Error cargando DB:", e); }
+    }
+
+    function cerrarSesion() {
+        clearInterval(intervaloBadges);
+        localStorage.removeItem('cedula_ika');
+        window.location.reload();
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       DASHBOARD Y EVENTOS
+    ══════════════════════════════════════════════════════════════ */
+    function mostrarDashboard() {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'block';
+        document.getElementById('worker-name').innerText = usuarioActual.nombre;
+
+        const cont = document.getElementById('contenedor-botones-eventos');
+        cont.innerHTML = '';
+        for (const evId in usuarioActual.eventos) {
+            const ev = usuarioActual.eventos[evId];
+            const div = document.createElement('div');
+            div.className = 'btn-evento-link';
+            div.onclick = () => verDetalleEvento(evId);
+            div.innerHTML = `<div><strong>${ev.titulo}</strong><br><small>${ev.fecha}</small></div><span>→</span>`;
+            cont.appendChild(div);
+        }
+    }
+
+    function verDetalleEvento(evId) {
+        idEventoActivo = evId;
+        const miEv = usuarioActual.eventos[evId];
+        document.getElementById('vista-lista-eventos').style.display = 'none';
+        document.getElementById('vista-detalle-evento').style.display = 'block';
+        document.getElementById('btn-chat-flotante').style.display = 'flex';
+        document.getElementById('det-evento-titulo').innerText = miEv.titulo;
+        document.getElementById('det-evento-fecha').innerText = miEv.fecha;
+
+        const contTareas = document.getElementById('contenedor-mis-tareas');
+        contTareas.innerHTML = '';
+        for (const rId in miEv.responsabilidades) {
+            const resp = miEv.responsabilidades[rId];
+            contTareas.innerHTML += `<div style="margin-bottom:10px; border-bottom:1px solid #eee; padding-bottom:5px; color:var(--dorado); font-size:0.8rem;"><strong>${resp.titulo_resp}</strong></div>`;
+            resp.items_checklist.forEach(it => {
+                const chk   = it.esta_listo === 1 ? 'checked' : '';
+                const clase = it.esta_listo === 1 ? 'completado' : '';
+                contTareas.innerHTML += `
+                    <div class="item-tarea ${clase}">
+                        <input type="checkbox" ${chk} onchange="notificarCambio('${it.id_tarea}', this)">
+                        <span>${it.tarea_texto}</span>
+                    </div>`;
+            });
+        }
+        renderizarOrganigrama(evId);
+
+        // Iniciar polling de badges mientras hay evento activo
+        clearInterval(intervaloBadges);
+        intervaloBadges = setInterval(() => actualizarBadgeTotal(), 5000);
+        actualizarBadgeTotal();
+    }
+
+    function volverALista() {
+        idEventoActivo = null;
+        clearInterval(intervaloBadges);
+        document.getElementById('vista-detalle-evento').style.display = 'none';
+        document.getElementById('vista-lista-eventos').style.display = 'block';
+        document.getElementById('btn-chat-flotante').style.display = 'none';
+        document.getElementById('badge-total').style.display = 'none';
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       TAREAS
+    ══════════════════════════════════════════════════════════════ */
+    function notificarCambio(idTarea, checkbox) {
+        const txt = checkbox.nextElementSibling;
+        if (checkbox.checked) {
+            txt.parentElement.classList.add('completado');
+            cambiosPendientes[idTarea] = 1;
+        } else {
+            txt.parentElement.classList.remove('completado');
+            cambiosPendientes[idTarea] = 0;
+        }
+        document.getElementById('btn-registrar-cambios').style.display =
+            Object.keys(cambiosPendientes).length > 0 ? 'block' : 'none';
+    }
+
+    async function registrarCambiosServidor() {
+        const btn = document.getElementById('btn-registrar-cambios');
+        btn.innerText = "SINCRONIZANDO...";
+        btn.disabled = true;
+        try {
+            const res = await fetch(SERVER_URL + '/actualizar_tareas', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ socio_id: usuarioActual.socio_id, cambios: cambiosPendientes })
+            });
+            if (res.ok) {
+                cambiosPendientes = {};
+                btn.innerText = "✅ ¡GUARDADO!";
+                btn.style.background = "#15803d";
+                setTimeout(async () => {
+                    await autenticar();
+                    btn.style.display = 'none';
+                    btn.style.background = "var(--success)";
+                    btn.innerText = "REGISTRAR CAMBIOS";
+                    btn.disabled = false;
+                }, 1500);
+            } else { throw new Error(); }
+        } catch {
+            alert("Error de conexión. Intenta de nuevo.");
+            btn.innerText = "REGISTRAR CAMBIOS";
+            btn.disabled = false;
+        }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       ORGANIGRAMA
+    ══════════════════════════════════════════════════════════════ */
+    function renderizarOrganigrama(evId) {
+        const contOrg = document.getElementById('contenedor-organigrama');
+        contOrg.innerHTML = '';
+
+        let participantes = [];
+        for (const ced in dbGlobal) {
+            const p = dbGlobal[ced];
+            if (!p.eventos[evId]) continue;
+            participantes.push({
+                socio_id: p.socio_id,
+                nombre: p.nombre,
+                rol: p.eventos[evId].rol.toUpperCase(),
+                nivel: JERARQUIA[p.eventos[evId].rol.toUpperCase()] || 1,
+                superior_id: p.eventos[evId].superior_id,
+                responsabilidades: p.eventos[evId].responsabilidades
+            });
+        }
+
+        let idsEnMiLinaje = new Set();
+        function trazarAscendencia(id) {
+            idsEnMiLinaje.add(id);
+            const p = participantes.find(x => x.socio_id == id);
+            if (p && p.superior_id) trazarAscendencia(p.superior_id);
+        }
+        trazarAscendencia(usuarioActual.socio_id);
+
+        function dibujarNivel(parentId, dest) {
+            const hijos = participantes.filter(p => p.superior_id == parentId);
+            if (!hijos.length) return;
+            const sub = document.createElement('div');
+            sub.className = 'contenedor-rama';
+            sub.id = 'rama-' + parentId;
+            if (idsEnMiLinaje.has(parentId)) sub.style.display = 'block';
+            dest.appendChild(sub);
+            hijos.forEach(h => {
+                const tieneSub = participantes.some(p => p.superior_id == h.socio_id);
+                const nodo = document.createElement('div');
+                let clases = `nodo-staff nivel-${h.nivel}`;
+                const esSubDirecto = h.superior_id == usuarioActual.socio_id;
+                if (idsEnMiLinaje.has(h.socio_id) || esSubDirecto) clases += " es-mi-linea";
+                if (h.socio_id == usuarioActual.socio_id) clases += " es-usuario-activo";
+                nodo.className = clases;
+                nodo.innerHTML = `
+                    <div class="info-superior" onclick="toggleElemento('${h.socio_id}')">
+                        <span class="nombre-miembro">${h.nombre}${tieneSub ? ' <span class="indicador-hijos">▼</span>' : ''}</span>
+                        <span class="rol-miembro">${h.rol}</span>
+                    </div>`;
+                if (h.nivel === 1) {
+                    const stats = calcularProgresoOrg(h.responsabilidades);
+                    nodo.innerHTML += `
+                        <div class="progress-container"><div class="progress-bar" style="width:${stats.porc}%"></div></div>
+                        <div id="tareas-org-${h.socio_id}" class="tareas-desplegables" style="${h.socio_id == usuarioActual.socio_id ? 'display:block;' : ''}">${stats.html}</div>`;
+                }
+                sub.appendChild(nodo);
+                dibujarNivel(h.socio_id, sub);
+            });
+        }
+
+        const raices = participantes.filter(p => !p.superior_id || p.superior_id == 0);
+        raices.forEach(raiz => {
+            const div = document.createElement('div');
+            div.className = `nodo-staff nivel-${raiz.nivel}${idsEnMiLinaje.has(raiz.socio_id) ? ' es-mi-linea' : ''}`;
+            div.innerHTML = `<div class="info-superior" onclick="toggleElemento('${raiz.socio_id}')"><span class="nombre-miembro">${raiz.nombre}</span><span class="rol-miembro">${raiz.rol}</span></div>`;
+            contOrg.appendChild(div);
+            dibujarNivel(raiz.socio_id, contOrg);
+        });
+    }
+
+    function toggleElemento(id) {
+        const rama  = document.getElementById('rama-' + id);
+        const tareas = document.getElementById('tareas-org-' + id);
+        if (rama)  rama.style.display  = rama.style.display  === 'block' ? 'none' : 'block';
+        if (tareas) tareas.style.display = tareas.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function calcularProgresoOrg(resps) {
+        let total = 0, hechos = 0, html = '';
+        for (const rId in resps) {
+            resps[rId].items_checklist.forEach(it => {
+                total++; if (it.esta_listo === 1) hechos++;
+                html += `<div style="font-size:0.7rem; margin-bottom:2px;">${it.esta_listo === 1 ? '✅' : '⭕'} ${it.tarea_texto}</div>`;
+            });
+        }
+        return { porc: total > 0 ? (hechos / total) * 100 : 0, html };
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       JERARQUÍA DE MENSAJES
+       Director   → puede escribir a todos
+       Coordinador → puede escribir a todos
+       Colaborador → puede escribir a Coordinadores y Colaboradores
+                     (NO puede iniciar mensaje a Directores)
+    ══════════════════════════════════════════════════════════════ */
+    function puedeEscribirA(miRol, suRol) {
+        if (miRol === 'DIRECTOR')    return true;
+        if (miRol === 'COORDINADOR') return true;
+        // COLABORADOR
+        return suRol !== 'DIRECTOR';
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       BADGES / NO LEÍDOS
+    ══════════════════════════════════════════════════════════════ */
+    let noLeidosPorConv = {}; // { 'GENERAL': 2, '123': 1, ... }
+
+    async function actualizarBadgeTotal() {
+        if (!idEventoActivo || !usuarioActual) return;
+        try {
+            const res = await fetch(
+                `${SERVER_URL}/obtener_no_leidos?evento=${idEventoActivo}&socio=${usuarioActual.socio_id}`
+            );
+            if (!res.ok) return;
+            const data = await res.json();
+            // Espera: { total: N, detalle: { "GENERAL": 2, "123": 1 } }
+            noLeidosPorConv = data.detalle || {};
+            const total = data.total || 0;
+
+            const badge = document.getElementById('badge-total');
+            if (total > 0) {
+                badge.innerText = total > 99 ? '99+' : total;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        } catch { /* servidor no disponible, silencioso */ }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       ABRIR LISTA DE CHATS
+       Muestra TODOS los participantes del evento  (no solo los
+       que el usuario puede escribir) para que los mensajes recibidos
+       de cualquier rol siempre sean visibles.
+    ══════════════════════════════════════════════════════════════ */
+    function abrirMenuChats() {
+        const lista = document.getElementById('lista-contactos');
+        const noLeidosGeneral = noLeidosPorConv['GENERAL'] || 0;
+        const badgeGeneral = noLeidosGeneral > 0
+            ? `<span class="badge-conv">${noLeidosGeneral}</span>` : '';
+
+        lista.innerHTML = `
+            <div class="chat-contacto" onclick="abrirConversacion('GENERAL','Chat General del Evento','GRUPO')">
+                <div>
+                    <strong>📢 Chat General del Evento</strong>
+                    <br><small>Todos los participantes</small>
+                </div>
+                <div style="display:flex;align-items:center;">💬${badgeGeneral}</div>
+            </div>
+            <div class="seccion-titulo">Mensajes Directos</div>`;
+
+        // Mostrar TODOS los participantes del evento
+        // (incluye Directores aunque el Colaborador no pueda responderles)
+        const miRol = usuarioActual.eventos[idEventoActivo].rol.toUpperCase();
+
+        for (const ced in dbGlobal) {
+            const p = dbGlobal[ced];
+            if (p.socio_id == usuarioActual.socio_id) continue;
+            const evInfo = p.eventos[idEventoActivo];
+            if (!evInfo) continue;
+
+            const pRol   = evInfo.rol.toUpperCase();
+            const keyConv = String(p.socio_id);
+            const nl      = noLeidosPorConv[keyConv] || 0;
+            const badgeP  = nl > 0 ? `<span class="badge-conv">${nl}</span>` : '';
+
+            // Ícono de bloqueo si el usuario no puede escribir (pero sí ve el chat)
+            const bloq   = !puedeEscribirA(miRol, pRol) ? ' 🔒' : '';
+
+            lista.innerHTML += `
+                <div class="chat-contacto" onclick="abrirConversacion('${p.socio_id}','${p.nombre}','${pRol}')">
+                    <div>
+                        <strong>${p.nombre}${bloq}</strong>
+                        <br><small>${pRol}</small>
+                    </div>
+                    <div style="display:flex;align-items:center;">✉️${badgeP}</div>
+                </div>`;
+        }
+
+        document.getElementById('overlay-lista-chats').classList.add('activo');
+    }
+
+    function cerrarMenuChats() {
+        document.getElementById('overlay-lista-chats').classList.remove('activo');
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       ABRIR CONVERSACIÓN
+    ══════════════════════════════════════════════════════════════ */
+    function abrirConversacion(idDestino, nombre, rol) {
+        socioChatDestino = idDestino;
+        rolChatDestino   = rol;
+
+        document.getElementById('nombre-chat-activo').innerText = nombre;
+        document.getElementById('rol-chat-activo').innerText    =
+            rol === 'GRUPO' ? 'Chat grupal del evento' : rol;
+
+        // ¿Puede escribir?
+        const miRol = usuarioActual.eventos[idEventoActivo]?.rol?.toUpperCase() || '';
+        puedeEscribir = (idDestino === 'GENERAL') || puedeEscribirA(miRol, rol);
+
+        const inputRow  = document.querySelector('.input-chat-container');
+        const avisoDiv  = document.getElementById('aviso-bloqueado');
+        if (puedeEscribir) {
+            inputRow.style.display  = 'flex';
+            avisoDiv.style.display  = 'none';
+        } else {
+            inputRow.style.display  = 'none';
+            avisoDiv.style.display  = 'block';
+        }
+
+        document.getElementById('ventana-mensajes').classList.add('activo');
+        cerrarMenuChats();
+
+        cargarMensajesServidor();
+        clearInterval(intervaloCarga);
+        intervaloCarga = setInterval(cargarMensajesServidor, 3000);
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       CARGAR MENSAJES  (glassmorphism bubbles + color por usuario)
+    ══════════════════════════════════════════════════════════════ */
+    async function cargarMensajesServidor() {
+        if (!socioChatDestino || !idEventoActivo) return;
+        try {
+            const res = await fetch(
+                `${SERVER_URL}/obtener_chat?evento=${idEventoActivo}&socio=${usuarioActual.socio_id}&target=${socioChatDestino}`
+            );
+            if (!res.ok) return;
+            const mensajes = await res.json();
+
+            const feed = document.getElementById('feed-mensajes');
+            const estaAbajo = feed.scrollHeight - feed.clientHeight <= feed.scrollTop + 60;
+
+            let html = '';
+            let ultimaFecha = '';
+            const esGrupal  = socioChatDestino === 'GENERAL';
+
+            mensajes.forEach(msg => {
+                const esMio = (msg.remitente_nombre === usuarioActual.nombre);
+
+                // Separador de fecha
+                const fechaMsg = msg.timestamp ? msg.timestamp.split(' ')[0] : '';
+                if (fechaMsg && fechaMsg !== ultimaFecha) {
+                    html += `<div class="separador-fecha">${formatearFecha(fechaMsg)}</div>`;
+                    ultimaFecha = fechaMsg;
+                }
+
+                // Hora
+                const hora = msg.timestamp
+                    ? msg.timestamp.split(' ')[1]?.substring(0, 5) || ''
+                    : '';
+
+                // Color de burbuja
+                let estiloColor = '';
+                if (!esMio) {
+                    estiloColor = `style="background:${colorParaUsuario(msg.remitente_id || msg.remitente_nombre)};"`;
+                }
+
+                // Nombre en grupos
+                const nombreGrupo = (esGrupal && !esMio)
+                    ? `<div class="burbuja-nombre-grupo" style="color:rgba(255,255,255,0.9); font-size:0.8rem;">${msg.remitente_nombre}</div>`
+                    : '';
+
+                html += `
+                    <div class="burbuja ${esMio ? 'yo' : 'otro'}" ${estiloColor}>
+                        ${nombreGrupo}
+                        ${msg.texto}
+                        <div class="burbuja-hora">${hora}</div>
+                    </div>`;
+            });
+
+            feed.innerHTML = html;
+
+            if (estaAbajo) feed.scrollTop = feed.scrollHeight;
+
+        } catch (e) { console.error("Error chat:", e); }
+    }
+
+    function formatearFecha(fechaStr) {
+        try {
+            const hoy   = new Date(); hoy.setHours(0,0,0,0);
+            const ayer  = new Date(hoy); ayer.setDate(ayer.getDate() - 1);
+            const fecha = new Date(fechaStr);
+            if (fecha.toDateString() === hoy.toDateString()) return 'Hoy';
+            if (fecha.toDateString() === ayer.toDateString()) return 'Ayer';
+            return fecha.toLocaleDateString('es-EC', { day:'numeric', month:'short' });
+        } catch { return fechaStr; }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       CERRAR VENTANA DE MENSAJES
+    ══════════════════════════════════════════════════════════════ */
+    function cerrarVentanaMensajes() {
+        document.getElementById('ventana-mensajes').classList.remove('activo');
+        clearInterval(intervaloCarga);
+        socioChatDestino = null;
+        // Actualizar badges al volver
+        actualizarBadgeTotal();
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       ENVIAR MENSAJE  — NO cierra el chat
+    ══════════════════════════════════════════════════════════════ */
+    async function enviarMensaje() {
+        if (!puedeEscribir) return;
+
+        const input = document.getElementById('input-nuevo-mensaje');
+        const txt   = input.value.trim();
+        if (!txt) return;
+
+        // Deshabilitar input mientras envía (evita doble envío)
+        input.disabled = true;
+
+        const payload = {
+            evento_id:       idEventoActivo,
+            remitente_id:    usuarioActual.socio_id,
+            remitente_nombre: usuarioActual.nombre,
+            receptor_id:     socioChatDestino,
+            texto:           txt,
+            tipo_chat:       (socioChatDestino === 'GENERAL') ? 'GRUPAL' : 'PRIVADO'
+        };
+
+        try {
+            const res = await fetch(`${SERVER_URL}/enviar_mensaje`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                input.value = '';
+                // Recargar mensajes sin salir del chat
+                await cargarMensajesServidor();
+                // Hacer scroll al final
+                const feed = document.getElementById('feed-mensajes');
+                feed.scrollTop = feed.scrollHeight;
+            } else {
+                alert("Error de servidor. No se guardó el mensaje.");
+            }
+        } catch {
+            alert("Error de conexión. Intenta de nuevo.");
+        } finally {
+            input.disabled = false;
+            input.focus();
+        }
+    }
+</script>
+</body>
+</html>
