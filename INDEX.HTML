@@ -677,23 +677,23 @@
     ══════════════════════════════════════════════════════════════ */
     function abrirMenuChats() {
         const lista = document.getElementById('lista-contactos');
+        const miEv = usuarioActual.eventos[idEventoActivo];
+        const tituloChatGeneral = miEv.titulo || "Chat General"; // Usa el título del evento
+        
         const noLeidosGeneral = noLeidosPorConv['GENERAL'] || 0;
-        const badgeGeneral = noLeidosGeneral > 0
-            ? `<span class="badge-conv">${noLeidosGeneral}</span>` : '';
+        const badgeGeneral = noLeidosGeneral > 0 ? `<span class="badge-conv">${noLeidosGeneral}</span>` : '';
 
         lista.innerHTML = `
-            <div class="chat-contacto" onclick="abrirConversacion('GENERAL','Chat General del Evento','GRUPO')">
+            <div class="chat-contacto" onclick="abrirConversacion('GENERAL','${tituloChatGeneral}','GRUPO')">
                 <div>
-                    <strong>📢 Chat General del Evento</strong>
+                    <strong>📢 ${tituloChatGeneral}</strong>
                     <br><small>Todos los participantes</small>
                 </div>
                 <div style="display:flex;align-items:center;">💬${badgeGeneral}</div>
             </div>
             <div class="seccion-titulo">Mensajes Directos</div>`;
 
-        // Mostrar TODOS los participantes del evento
-        // (incluye Directores aunque el Colaborador no pueda responderles)
-        const miRol = usuarioActual.eventos[idEventoActivo].rol.toUpperCase();
+        const miRol = miEv.rol.toUpperCase();
 
         for (const ced in dbGlobal) {
             const p = dbGlobal[ced];
@@ -701,13 +701,11 @@
             const evInfo = p.eventos[idEventoActivo];
             if (!evInfo) continue;
 
-            const pRol   = evInfo.rol.toUpperCase();
+            const pRol = evInfo.rol.toUpperCase();
             const keyConv = String(p.socio_id);
-            const nl      = noLeidosPorConv[keyConv] || 0;
-            const badgeP  = nl > 0 ? `<span class="badge-conv">${nl}</span>` : '';
-
-            // Ícono de bloqueo si el usuario no puede escribir (pero sí ve el chat)
-            const bloq   = !puedeEscribirA(miRol, pRol) ? ' 🔒' : '';
+            const nl = noLeidosPorConv[keyConv] || 0;
+            const badgeP = nl > 0 ? `<span class="badge-conv">${nl}</span>` : '';
+            const bloq = !puedeEscribirA(miRol, pRol) ? ' 🔒' : '';
 
             lista.innerHTML += `
                 <div class="chat-contacto" onclick="abrirConversacion('${p.socio_id}','${p.nombre}','${pRol}')">
@@ -718,12 +716,7 @@
                     <div style="display:flex;align-items:center;">✉️${badgeP}</div>
                 </div>`;
         }
-
         document.getElementById('overlay-lista-chats').classList.add('activo');
-    }
-
-    function cerrarMenuChats() {
-        document.getElementById('overlay-lista-chats').classList.remove('activo');
     }
 
     /* ══════════════════════════════════════════════════════════════
@@ -765,57 +758,45 @@
     async function cargarMensajesServidor() {
         if (!socioChatDestino || !idEventoActivo) return;
         try {
-            const res = await fetch(
-                `${SERVER_URL}/obtener_chat?evento=${idEventoActivo}&socio=${usuarioActual.socio_id}&target=${socioChatDestino}`
-            );
+            const res = await fetch(`${SERVER_URL}/obtener_chat?evento=${idEventoActivo}&socio=${usuarioActual.socio_id}&target=${socioChatDestino}`);
             if (!res.ok) return;
             const mensajes = await res.json();
 
+            // LÓGICA DE DESBLOQUEO: Si un Director me habló, puedo responder
+            if (socioChatDestino !== 'GENERAL' && !puedeEscribir) {
+                const mensajeRecibido = mensajes.some(m => m.remitente_id == socioChatDestino);
+                if (mensajeRecibido) {
+                    puedeEscribir = true;
+                    document.querySelector('.input-chat-container').style.display = 'flex';
+                    document.getElementById('aviso-bloqueado').style.display = 'none';
+                }
+            }
+
             const feed = document.getElementById('feed-mensajes');
             const estaAbajo = feed.scrollHeight - feed.clientHeight <= feed.scrollTop + 60;
-
             let html = '';
             let ultimaFecha = '';
-            const esGrupal  = socioChatDestino === 'GENERAL';
+            const esGrupal = socioChatDestino === 'GENERAL';
 
             mensajes.forEach(msg => {
                 const esMio = (msg.remitente_nombre === usuarioActual.nombre);
-
-                // Separador de fecha
                 const fechaMsg = msg.timestamp ? msg.timestamp.split(' ')[0] : '';
                 if (fechaMsg && fechaMsg !== ultimaFecha) {
                     html += `<div class="separador-fecha">${formatearFecha(fechaMsg)}</div>`;
                     ultimaFecha = fechaMsg;
                 }
-
-                // Hora
-                const hora = msg.timestamp
-                    ? msg.timestamp.split(' ')[1]?.substring(0, 5) || ''
-                    : '';
-
-                // Color de burbuja
-                let estiloColor = '';
-                if (!esMio) {
-                    estiloColor = `style="background:${colorParaUsuario(msg.remitente_id || msg.remitente_nombre)};"`;
-                }
-
-                // Nombre en grupos
-                const nombreGrupo = (esGrupal && !esMio)
-                    ? `<div class="burbuja-nombre-grupo" style="color:rgba(255,255,255,0.9); font-size:0.8rem;">${msg.remitente_nombre}</div>`
-                    : '';
+                const hora = msg.timestamp ? msg.timestamp.split(' ')[1]?.substring(0, 5) || '' : '';
+                let estiloColor = esMio ? '' : `style="background:${colorParaUsuario(msg.remitente_id || msg.remitente_nombre)};"`;
+                const nombreGrupo = (esGrupal && !esMio) ? `<div class="burbuja-nombre-grupo">${msg.remitente_nombre}</div>` : '';
 
                 html += `
                     <div class="burbuja ${esMio ? 'yo' : 'otro'}" ${estiloColor}>
-                        ${nombreGrupo}
-                        ${msg.texto}
+                        ${nombreGrupo}${msg.texto}
                         <div class="burbuja-hora">${hora}</div>
                     </div>`;
             });
-
             feed.innerHTML = html;
-
             if (estaAbajo) feed.scrollTop = feed.scrollHeight;
-
         } catch (e) { console.error("Error chat:", e); }
     }
 
