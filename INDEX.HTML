@@ -148,6 +148,15 @@
         }
         .chat-contacto:active { transform: scale(0.98); }
 
+        /* ── Chat con mensajes no leídos ── */
+        .chat-contacto.no-leido {
+            border-left: 4px solid #dc2626;
+            background: #fff5f5;
+        }
+        .chat-contacto.no-leido strong {
+            color: #991b1b;
+        }
+
         .badge-conv {
             background: #dc2626; color: white;
             font-size: 0.65rem; font-weight: 800;
@@ -681,10 +690,14 @@
         const badgeGeneral = noLeidosGeneral > 0
             ? `<span class="badge-conv">${noLeidosGeneral}</span>` : '';
 
+        // ── Bug 3 fix: usar el título real del evento ──
+        const tituloEvento = usuarioActual.eventos[idEventoActivo]?.titulo || 'Chat General';
+        const claseGeneral = noLeidosGeneral > 0 ? 'chat-contacto no-leido' : 'chat-contacto';
+
         lista.innerHTML = `
-            <div class="chat-contacto" onclick="abrirConversacion('GENERAL','Chat General del Evento','GRUPO')">
+            <div class="${claseGeneral}" onclick="abrirConversacion('GENERAL','${tituloEvento}','GRUPO')">
                 <div>
-                    <strong>📢 Chat General del Evento</strong>
+                    <strong>📢 ${tituloEvento}</strong>
                     <br><small>Todos los participantes</small>
                 </div>
                 <div style="display:flex;align-items:center;">💬${badgeGeneral}</div>
@@ -708,9 +721,11 @@
 
             // Ícono de bloqueo si el usuario no puede escribir (pero sí ve el chat)
             const bloq   = !puedeEscribirA(miRol, pRol) ? ' 🔒' : '';
+            // ── Bug 2 fix: resaltar chats con mensajes no leídos ──
+            const claseContacto = nl > 0 ? 'chat-contacto no-leido' : 'chat-contacto';
 
             lista.innerHTML += `
-                <div class="chat-contacto" onclick="abrirConversacion('${p.socio_id}','${p.nombre}','${pRol}')">
+                <div class="${claseContacto}" onclick="abrirConversacion('${p.socio_id}','${p.nombre}','${pRol}')">
                     <div>
                         <strong>${p.nombre}${bloq}</strong>
                         <br><small>${pRol}</small>
@@ -735,7 +750,7 @@
 
         document.getElementById('nombre-chat-activo').innerText = nombre;
         document.getElementById('rol-chat-activo').innerText    =
-            rol === 'GRUPO' ? 'Chat grupal del evento' : rol;
+            rol === 'GRUPO' ? `Chat grupal · ${usuarioActual.eventos[idDestino === 'GENERAL' ? idEventoActivo : idEventoActivo]?.titulo || 'Evento'}` : rol;
 
         // ¿Puede escribir?
         const miRol = usuarioActual.eventos[idEventoActivo]?.rol?.toUpperCase() || '';
@@ -815,6 +830,24 @@
             feed.innerHTML = html;
 
             if (estaAbajo) feed.scrollTop = feed.scrollHeight;
+
+            // ── Bug 1 fix: desbloquear respuesta si el Director ya escribió ──
+            // Si el usuario es COLABORADOR y está en un chat con un DIRECTOR,
+            // verificar si hay mensajes enviados por ese Director. Si los hay,
+            // habilitar el input para que el Colaborador pueda responder.
+            if (!puedeEscribir && mensajes.length > 0) {
+                const miRol = usuarioActual.eventos[idEventoActivo]?.rol?.toUpperCase() || '';
+                if (miRol === 'COLABORADOR' && rolChatDestino === 'DIRECTOR') {
+                    const hayMsgDelDirector = mensajes.some(
+                        msg => String(msg.remitente_id) === String(socioChatDestino)
+                    );
+                    if (hayMsgDelDirector) {
+                        puedeEscribir = true;
+                        document.querySelector('.input-chat-container').style.display = 'flex';
+                        document.getElementById('aviso-bloqueado').style.display = 'none';
+                    }
+                }
+            }
 
         } catch (e) { console.error("Error chat:", e); }
     }
