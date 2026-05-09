@@ -386,7 +386,7 @@
     let puedeEscribir    = true;   // si el usuario puede enviar en la conv. activa
 
     const JERARQUIA = { "DIRECTOR": 3, "COORDINADOR": 2, "COLABORADOR": 1 };
-    const SERVER_URL = "https://ika-server.onrender.com"
+    const SERVER_URL = "http://localhost:5002"
 
     /* ── Paleta de colores consistente por usuario ──
        Se asigna a partir del socio_id → siempre el mismo color */
@@ -744,6 +744,19 @@
     /* ══════════════════════════════════════════════════════════════
        ABRIR CONVERSACIÓN
     ══════════════════════════════════════════════════════════════ */
+        function aplicarEstadoInput() {
+        const inputRow = document.querySelector('.input-chat-container');
+        const avisoDiv = document.getElementById('aviso-bloqueado');
+        if (!inputRow || !avisoDiv) return;
+        if (puedeEscribir) {
+            inputRow.style.display = 'flex';
+            avisoDiv.style.display = 'none';
+        } else {
+            inputRow.style.display = 'none';
+            avisoDiv.style.display = 'block';
+        }
+    }
+
     function abrirConversacion(idDestino, nombre, rol) {
         socioChatDestino = idDestino;
         rolChatDestino   = rol;
@@ -756,15 +769,7 @@
         const miRol = usuarioActual.eventos[idEventoActivo]?.rol?.toUpperCase() || '';
         puedeEscribir = (idDestino === 'GENERAL') || puedeEscribirA(miRol, rol);
 
-        const inputRow  = document.querySelector('.input-chat-container');
-        const avisoDiv  = document.getElementById('aviso-bloqueado');
-        if (puedeEscribir) {
-            inputRow.style.display  = 'flex';
-            avisoDiv.style.display  = 'none';
-        } else {
-            inputRow.style.display  = 'none';
-            avisoDiv.style.display  = 'block';
-        }
+        aplicarEstadoInput();
 
         document.getElementById('ventana-mensajes').classList.add('activo');
         cerrarMenuChats();
@@ -847,23 +852,20 @@
 
             if (estaAbajo) feed.scrollTop = feed.scrollHeight;
 
-            // ── Bug 1 fix: desbloquear respuesta si el Director ya escribió ──
-            // Si el usuario es COLABORADOR y está en un chat con un DIRECTOR,
-            // verificar si hay mensajes enviados por ese Director. Si los hay,
-            // habilitar el input para que el Colaborador pueda responder.
+            // ── Revaluar permiso de escritura en cada ciclo de polling ──
             if (!puedeEscribir && mensajes.length > 0) {
                 const miRol = usuarioActual.eventos[idEventoActivo]?.rol?.toUpperCase() || '';
                 if (miRol === 'COLABORADOR' && rolChatDestino === 'DIRECTOR') {
                     const hayMsgDelDirector = mensajes.some(
                         msg => String(msg.remitente_id) === String(socioChatDestino)
+                            || msg.remitente_nombre !== usuarioActual.nombre
                     );
                     if (hayMsgDelDirector) {
                         puedeEscribir = true;
-                        document.querySelector('.input-chat-container').style.display = 'flex';
-                        document.getElementById('aviso-bloqueado').style.display = 'none';
                     }
                 }
             }
+            aplicarEstadoInput();
 
         } catch (e) { console.error("Error chat:", e); }
     }
