@@ -42,7 +42,9 @@ def obtener_mensajes_sala(evento_id, socio_id, target_id):
 def registrar_nuevo_mensaje(datos):
     conn = conectar_chat()
     cursor = conn.cursor()
-    fecha_actual = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    from datetime import datetime, timezone, timedelta
+    ecuador = timezone(timedelta(hours=-5))
+    fecha_actual = datetime.now(ecuador).strftime("%Y-%m-%d %H:%M:%S")
     evento_id        = datos['evento_id']
     remitente_nombre = datos['remitente_nombre']
     socio_id         = datos['remitente_id']
