@@ -1,0 +1,325 @@
+{
+    "978523694": {
+        "nombre": "Juan Pablo Chavez Viteri",
+        "socio_id": 32,
+        "eventos": {
+            "1": {
+                "titulo": "COMPETENCIA RUMINIAHUI",
+                "fecha": "17/05/2026",
+                "rol": "Director",
+                "superior_id": null,
+                "responsabilidades": {
+                    "6": {
+                        "titulo_resp": "JAJAJJAAJAJ",
+                        "estado_resp": "Pendiente",
+                        "items_checklist": [
+                            {
+                                "tarea_texto": "ASDFSADF",
+                                "esta_listo": 0,
+                                "id_tarea": 14
+                            },
+                            {
+                                "tarea_texto": "ASDF",
+                                "esta_listo": 0,
+                                "id_tarea": 15
+                            },
+                            {
+                                "tarea_texto": "ASDF",
+                                "esta_listo": 0,
+                                "id_tarea": 16
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "919638524": {
+        "nombre": "Edison Javier Cordero Reyes",
+        "socio_id": 42,
+        "eventos": {
+            "1": {
+                "titulo": "COMPETENCIA RUMINIAHUI",
+                "fecha": "17/05/2026",
+                "rol": "Director",
+                "superior_id": null,
+                "responsabilidades": {}
+            }
+        }
+    },
+    "974512368": {
+        "nombre": "Jorge Luis Herrera Pico",
+        "socio_id": 8,
+        "eventos": {
+            "1": {
+                "titulo": "COMPETENCIA RUMINIAHUI",
+                "fecha": "17/05/2026",
+                "rol": "Director",
+                "superior_id": null,
+                "responsabilidades": {}
+            }
+        }
+    },
+    "957412365": {
+        "nombre": "Xavier Antonio Ibarra Luna",
+        "socio_id": 22,
+        "eventos": {
+            "1": {
+                "titulo": "COMPETENCIA RUMINIAHUI",
+                "fecha": "17/05/2026",
+                "rol": "Coordinador",
+                "superior_id": 32,
+                "responsabilidades": {}
+            }
+        }
+    },
+    "985632147": {
+        "nombre": "Paula Andrea Lara Ponce",
+        "socio_id": 17,
+        "eventos": {
+            "1": {
+                "titulo": "COMPETENCIA RUMINIAHUI",
+                "fecha": "17/05/2026",
+                "rol": "Coordinador",
+                "superior_id": 42,
+                "responsabilidades": {}
+            },
+            "2": {
+                "titulo": "CLUB IKA",
+                "fecha": "07/05/2026",
+                "rol": "Director",
+                "superior_id": null,
+                "responsabilidades": {}
+            }
+        }
+    },
+    "912456781": {
+        "nombre": "Carlos Andres Mendoza Ruiz",
+        "socio_id": 2,
+        "eventos": {
+            "1": {
+                "titulo": "COMPETENCIA RUMINIAHUI",
+                "fecha": "17/05/2026",
+                "rol": "Colaborador",
+                "superior_id": 17,
+                "responsabilidades": {}
+            },
+            "2": {
+                "titulo": "CLUB IKA",
+                "fecha": "07/05/2026",
+                "rol": "Coordinador",
+                "superior_id": 17,
+                "responsabilidades": {}
+            }
+        }
+    },
+    "941258741": {
+        "nombre": "Fernanda Lucia Molina Cajas",
+        "socio_id": 13,
+        "eventos": {
+            "1": {
+                "titulo": "COMPETENCIA RUMINIAHUI",
+                "fecha": "17/05/2026",
+                "rol": "Coordinador",
+                "superior_id": 32,
+                "responsabilidades": {
+                    "2": {
+                        "titulo_resp": "DIPLOMAS",
+                        "estado_resp": "Pendiente",
+                        "items_checklist": [
+                            {
+                                "tarea_texto": "HACER DIPLOMAS",
+                                "esta_listo": 0,
+                                "id_tarea": 4
+                            },
+                            {
+                                "tarea_texto": "IMPRIMIR DIPLOMAS",
+                                "esta_listo": 0,
+                                "id_tarea": 5
+                            }
+                        ]
+                    }
+                }
+            },
+            "2": {
+                "titulo": "CLUB IKA",
+                "fecha": "07/05/2026",
+                "rol": "Coordinador",
+                "superior_id": 17,
+                "responsabilidades": {}
+            }
+        }
+    },
+    "947412586": {
+        "nombre": "Tatiana Morejon Ruiz",
+        "socio_id": 37,
+        "eventos": {
+            "1": {
+                "titulo": "COMPETENCIA RUMINIAHUI",
+                "fecha": "17/05/2026",
+                "rol": "Coordinador",
+                "superior_id": 42,
+                "responsabilidades": {}
+            },
+            "2": {
+                "titulo": "CLUB IKA",
+                "fecha": "07/05/2026",
+                "rol": "Colaborador",
+                "superior_id": 27,
+                "responsabilidades": {}
+            }
+        }
+    },
+    "968527415": {
+        "nombre": "Daniela Sofia Pacheco Mena",
+        "socio_id": 47,
+        "eventos": {
+            "1": {
+                "titulo": "COMPETENCIA RUMINIAHUI",
+                "fecha": "17/05/2026",
+                "rol": "Coordinador",
+                "superior_id": 8,
+                "responsabilidades": {
+                    "1": {
+                        "titulo_resp": "TAREAS DE LIMPIEZA",
+                        "estado_resp": "En curso",
+                        "items_checklist": [
+                            {
+                                "tarea_texto": "TATAMIS",
+                                "esta_listo": 1,
+                                "id_tarea": 1
+                            },
+                            {
+                                "tarea_texto": "BUTACAS",
+                                "esta_listo": 1,
+                                "id_tarea": 2
+                            },
+                            {
+                                "tarea_texto": "BUANIOS",
+                                "esta_listo": 1,
+                                "id_tarea": 3
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    },
+    "929631478": {
+        "nombre": "Lucia Fernanda Rosero Diaz",
+        "socio_id": 27,
+        "eventos": {
+            "1": {
+                "titulo": "COMPETENCIA RUMINIAHUI",
+                "fecha": "17/05/2026",
+                "rol": "Colaborador",
+                "superior_id": 13,
+                "responsabilidades": {
+                    "5": {
+                        "titulo_resp": "COMPROBAR BUEN ESTADO",
+                        "estado_resp": "En curso",
+                        "items_checklist": [
+                            {
+                                "tarea_texto": "ESTADO DE BUTACAS",
+                                "esta_listo": 1,
+                                "id_tarea": 11
+                            },
+                            {
+                                "tarea_texto": "ESTADO DE TAATMIS",
+                                "esta_listo": 1,
+                                "id_tarea": 12
+                            },
+                            {
+                                "tarea_texto": "ESTADO DE GUANTES",
+                                "esta_listo": 1,
+                                "id_tarea": 13
+                            }
+                        ]
+                    },
+                    "3": {
+                        "titulo_resp": "CORDINAR INGRESOS",
+                        "estado_resp": "Completado",
+                        "items_checklist": [
+                            {
+                                "tarea_texto": "NUMERO DE PERSONAS ASISTENTES",
+                                "esta_listo": 1,
+                                "id_tarea": 6
+                            },
+                            {
+                                "tarea_texto": "NUMERO DE INGRESOS",
+                                "esta_listo": 1,
+                                "id_tarea": 7
+                            }
+                        ]
+                    },
+                    "8": {
+                        "titulo_resp": "jkbkj;;jkbkjb",
+                        "estado_resp": "Pendiente",
+                        "items_checklist": [
+                            {
+                                "tarea_texto": "lkjlj",
+                                "esta_listo": 1,
+                                "id_tarea": 20
+                            },
+                            {
+                                "tarea_texto": "lkjlk",
+                                "esta_listo": 1,
+                                "id_tarea": 21
+                            }
+                        ]
+                    },
+                    "7": {
+                        "titulo_resp": "otra responsabiliad",
+                        "estado_resp": "Pendiente",
+                        "items_checklist": [
+                            {
+                                "tarea_texto": "pruena 1",
+                                "esta_listo": 1,
+                                "id_tarea": 17
+                            },
+                            {
+                                "tarea_texto": "prueba 2",
+                                "esta_listo": 0,
+                                "id_tarea": 18
+                            },
+                            {
+                                "tarea_texto": "prueba 3",
+                                "esta_listo": 0,
+                                "id_tarea": 19
+                            }
+                        ]
+                    }
+                }
+            },
+            "2": {
+                "titulo": "CLUB IKA",
+                "fecha": "07/05/2026",
+                "rol": "Coordinador",
+                "superior_id": 17,
+                "responsabilidades": {
+                    "4": {
+                        "titulo_resp": "COMPRAR INSUMOS",
+                        "estado_resp": "Pendiente",
+                        "items_checklist": [
+                            {
+                                "tarea_texto": "AGUA",
+                                "esta_listo": 0,
+                                "id_tarea": 8
+                            },
+                            {
+                                "tarea_texto": "SHAMPOO",
+                                "esta_listo": 0,
+                                "id_tarea": 9
+                            },
+                            {
+                                "tarea_texto": "COMIDA",
+                                "esta_listo": 0,
+                                "id_tarea": 10
+                            }
+                        ]
+                    }
+                }
+            }
+        }
+    }
+}
