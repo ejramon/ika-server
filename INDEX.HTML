@@ -386,7 +386,7 @@
     let puedeEscribir    = true;   // si el usuario puede enviar en la conv. activa
 
     const JERARQUIA = { "DIRECTOR": 3, "COORDINADOR": 2, "COLABORADOR": 1 };
-    const SERVER_URL = "https://ika-server.onrender.com";
+    const SERVER_URL = "http://localhost:5002"
 
     /* ── Paleta de colores consistente por usuario ──
        Se asigna a partir del socio_id → siempre el mismo color */
@@ -768,6 +768,22 @@
 
         document.getElementById('ventana-mensajes').classList.add('activo');
         cerrarMenuChats();
+
+        // Avisar al servidor que abrimos esta conversación (limpia el badge)
+        fetch(`${SERVER_URL}/marcar_leido`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                evento_id: idEventoActivo,
+                socio_id:  usuarioActual.socio_id,
+                target_id: idDestino
+            })
+        }).then(() => {
+            // Limpiar badge localmente sin esperar el polling
+            const key = idDestino === 'GENERAL' ? 'GENERAL' : String(idDestino);
+            delete noLeidosPorConv[key];
+            actualizarBadgeTotal();
+        }).catch(() => {});
 
         cargarMensajesServidor();
         clearInterval(intervaloCarga);
